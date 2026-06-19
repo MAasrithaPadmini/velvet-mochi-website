@@ -33,7 +33,8 @@ export function NewsletterDashboard({
     const json = await response.json();
     setBusy(false);
     if (response.ok) {
-      setMessage({ text: `Campaign logged for ${json.recipient_count} subscribers.`, ok: true });
+      const failedNote = json.failed > 0 ? ` (${json.failed} failed)` : "";
+      setMessage({ text: `Sent to ${json.recipient_count} subscribers${failedNote}.`, ok: true });
       setSubject("");
       setBody("");
       if (json.campaign) setHistory([json.campaign, ...history]);
@@ -70,7 +71,7 @@ export function NewsletterDashboard({
           disabled={busy}
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-champagne px-5 py-3 font-semibold text-velvet disabled:opacity-60"
         >
-          <Send size={15} /> {busy ? "Logging..." : `Send to ${active.length} subscribers`}
+          <Send size={15} /> {busy ? "Sending…" : `Send to ${active.length} subscribers`}
         </button>
         {message && (
           <p className={`mt-3 rounded-2xl border p-3 text-sm ${message.ok ? "border-champagne/30 bg-champagne/10 text-champagne" : "border-rose/30 bg-rose/10 text-rose"}`}>

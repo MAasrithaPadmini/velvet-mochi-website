@@ -20,7 +20,7 @@ export default async function NewsletterPage() {
       <PageHeader
         eyebrow="Newsletter"
         title="Send chapter alerts to your subscribers."
-        copy="A campaign is logged here. To actually deliver email, connect a sender (Resend, Postmark) on the Settings page later."
+        copy="Write a campaign below and send it directly to all your subscribers via Resend."
       />
       <AdminNav />
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
