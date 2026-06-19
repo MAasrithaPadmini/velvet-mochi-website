@@ -14,7 +14,7 @@ export default function TermsPage() {
           <p className="text-sm text-cream/50 mb-8">Last updated: {updated}</p>
 
           <Section title="1. Acceptance of Terms">
-            By accessing and using Velvet Mochi ("the Platform"), you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use this platform.
+            By accessing and using Velvet Mochi ('the Platform'), you accept and agree to be bound by these Terms of Service. If you do not agree, please do not use this platform.
           </Section>
 
           <Section title="2. About the Platform">
