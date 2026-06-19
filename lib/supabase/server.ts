@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
 
 export async function createClient() {
@@ -14,13 +14,15 @@ export async function createClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
         try {
-          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
         } catch {
-          // Server Components cannot always set cookies; middleware refreshes sessions.
+          // Server Components can't set cookies during render — that's OK
         }
-      }
-    }
+      },
+    },
   });
 }
