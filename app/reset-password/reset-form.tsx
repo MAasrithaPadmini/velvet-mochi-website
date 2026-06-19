@@ -23,7 +23,9 @@ export function ResetPasswordForm() {
       redirectTo: `${location.origin}/reset-password/confirm`,
     });
     setMessage({
-      text: error ? error.message : "If that email exists, we just sent a reset link. Check your inbox.",
+      text: error
+        ? error.message
+        : "Reset link sent! Check your inbox.",
       ok: !error,
     });
     setBusy(false);
