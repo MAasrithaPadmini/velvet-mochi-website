@@ -30,10 +30,12 @@ export const metadata: Metadata = {
     "Indian dark romance",
     "free romance reading",
   ],
+  metadataBase: new URL("https://velvetmochi.com"),
   openGraph: {
     title: "Velvet Mochi",
     description: "Enter a moonlit library of serialized dark romance. New chapters daily.",
     type: "website",
+    url: "https://velvetmochi.com",
   },
   icons: {
     icon: "/favicon.svg",
