@@ -52,6 +52,13 @@ export function BookCover({ story, large = false }: { story: Story; large?: bool
   );
 }
 
+function releaseLabel(story: Story): string {
+  const val = story.next_release?.trim();
+  if (val && val.toLowerCase() !== "unscheduled") return val;
+  if (story.status === "archived") return "Completed";
+  return "Ongoing";
+}
+
 export function StoryCard({ story }: { story: Story }) {
   return (
     <article className="glass overflow-hidden rounded-[1.75rem] p-4">
@@ -68,7 +75,7 @@ export function StoryCard({ story }: { story: Story }) {
         <span>
           {story.chapter_count} chapter{story.chapter_count === 1 ? "" : "s"}
         </span>
-        <span>{story.next_release}</span>
+        <span>{releaseLabel(story)}</span>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <Link href={`/stories/${story.slug}`} className="rounded-full bg-champagne px-4 py-2 text-center text-sm font-semibold text-velvet">

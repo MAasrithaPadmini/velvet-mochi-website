@@ -84,7 +84,7 @@ export default async function HomePage() {
         )}
       </section>
 
-      {stories.length > 0 && (
+      {stories.length > 1 && (
         <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
@@ -96,7 +96,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid gap-5 lg:grid-cols-3">
-            {stories.slice(0, 3).map((story) => (
+            {stories.slice(1, 4).map((story) => (
               <StoryCard key={story.id} story={story} />
             ))}
           </div>
