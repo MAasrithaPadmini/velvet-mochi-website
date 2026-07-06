@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { SignOutButton } from "@/components/auth-form";
+import { AccountSettings } from "@/components/account-settings";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -70,6 +71,11 @@ export default async function ProfilePage() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <h2 className="mb-4 font-display text-3xl text-cream">Account settings</h2>
+        <AccountSettings />
       </section>
     </AppShell>
   );

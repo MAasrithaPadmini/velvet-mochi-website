@@ -8,6 +8,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [confirmedAge, setConfirmedAge] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,6 +27,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (mode === "register" && password.length < 8) {
       setIsError(true);
       setMessage("Password must be at least 8 characters.");
+      return;
+    }
+    if (mode === "register" && !agreedToTerms) {
+      setIsError(true);
+      setMessage("Please agree to the Terms of Service and Privacy Policy to continue.");
+      return;
+    }
+    if (mode === "register" && !confirmedAge) {
+      setIsError(true);
+      setMessage("Please confirm you are 18 or older to create an account.");
       return;
     }
 
@@ -64,7 +76,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       password,
       options: {
         emailRedirectTo: `${location.origin}/auth/callback`,
-        data: { display_name: displayName || email.split("@")[0] },
+        data: { display_name: displayName || email.split("@")[0], age_confirmed: true },
       },
     });
 
@@ -80,6 +92,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       setMessage("Account created. Check your email to confirm, then log in. (Or disable email confirmation in Supabase Authentication settings.)");
       setLoading(false);
       return;
+    }
+
+    if (data.user) {
+      await supabase.from("profiles").update({ age_confirmed: true }).eq("id", data.user.id);
     }
 
     await new Promise((r) => setTimeout(r, 300));
@@ -144,6 +160,38 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           className="mt-2 w-full rounded-2xl border border-cream/10 bg-cream/7 px-4 py-3 text-cream outline-none focus:border-champagne/40"
         />
       </label>
+
+      {mode === "register" && (
+        <div className="mt-5 space-y-3">
+          <label className="flex items-start gap-3 text-sm text-cream/70">
+            <input
+              type="checkbox"
+              checked={confirmedAge}
+              onChange={(e) => setConfirmedAge(e.target.checked)}
+              className="mt-0.5 size-4 shrink-0 rounded border-cream/30 bg-cream/7 accent-champagne"
+            />
+            <span>I confirm that I am 18 years of age or older.</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-cream/70">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+              className="mt-0.5 size-4 shrink-0 rounded border-cream/30 bg-cream/7 accent-champagne"
+            />
+            <span>
+              I agree to the{" "}
+              <Link href="/terms" target="_blank" className="text-champagne underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" target="_blank" className="text-champagne underline">
+                Privacy Policy
+              </Link>.
+            </span>
+          </label>
+        </div>
+      )}
 
       <button
         disabled={loading}
