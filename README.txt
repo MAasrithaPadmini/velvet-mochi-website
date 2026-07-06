@@ -1,44 +1,36 @@
-VELVET MOCHI - FIXES BATCH 2
+VELVET MOCHI - FIXES BATCH 3
 ================================================
 
 FILES CHANGED / ADDED
 ----------------------
-1. components/chapter-list.tsx (NEW)
-   - Chapters now group into collapsible blocks of 20, newest chapters
-     first, with the latest group open by default.
-   - For stories with 20 or fewer chapters, it just shows a flat list
-     (no grouping UI needed).
+1. app/faq/page.tsx (NEW)
+   - Answers common questions: is it free, do you need an account,
+     what the age gate is, how to report issues, how to delete your
+     account, whether it's fan fiction, etc.
 
-2. app/stories/[slug]/page.tsx (EDITED)
-   - Now uses the new ChapterList component instead of rendering all
-     chapters inline. Removed the now-unused "Link" import.
+2. app/content-guide/page.tsx (NEW)
+   - Dynamically pulls every unique content/trigger warning tag
+     actually used across your published stories (queries your live
+     Supabase data -- doesn't hardcode assumptions) and shows a plain
+     explanation for each. Falls back to a generic note for any tag
+     not in the built-in dictionary, so it never breaks if you add a
+     new warning label later.
 
-3. app/page.tsx (EDITED) -- FIXES THE DUPLICATE DESCRIPTION BUG
-   - Previously: your featured story (stories[0]) showed in the hero
-     section with its full title + synopsis, AND ALSO appeared again
-     in the "New and beloved" grid right below it (since
-     stories.slice(0,3) included that same story at index 0). That's
-     exactly the "same story description repeat avuthondi" bug.
-   - Fixed: the grid below now starts from stories.slice(1, 4) --
-     skipping the featured story so it doesn't duplicate. Also changed
-     the section's visibility condition to only show when there's more
-     than 1 story, so it doesn't render an empty section when you only
-     have one story total.
+3. app/schedule/page.tsx (NEW)
+   - Shows each published story with its chapter count, status, and
+     "last update: X days/weeks ago" -- computed from real published_at
+     timestamps in your chapters, not made up.
 
-4. components/story-card.tsx (EDITED) -- FIXES "Unscheduled" LABEL
-   - Added a releaseLabel() helper: if a story has no next_release
-     date set, it now shows "Ongoing" (for published/active stories)
-     or "Completed" (for archived stories) instead of the raw
-     "Unscheduled" placeholder text.
+4. components/footer.tsx (EDITED)
+   - Added links to Release Schedule, Content Guide, and FAQ so
+     they're discoverable site-wide.
+
+5. app/sitemap.ts (EDITED)
+   - Added /faq, /content-guide, /schedule, and /contact to your
+     sitemap so Google indexes them too.
 
 HOW TO APPLY
 ------------
-Copy each file into the same path in your project (paths shown above),
-overwriting the existing ones. Commit and push.
-
-NOTE
-----
-The "Possessive" spelling typo you mentioned isn't in the code -- it's
-in the actual story content you entered through the admin dashboard.
-Just edit that story's genre/tag text directly in your dashboard to
-fix it.
+Copy each file into the same path in your project (paths shown above).
+The 3 page.tsx files are new -- create the folders/files fresh. The
+footer.tsx and sitemap.ts overwrite existing files. Commit and push.

@@ -25,6 +25,15 @@ export function Footer() {
             <Link href="/library" className="hover:text-champagne transition-colors">
               Library
             </Link>
+            <Link href="/schedule" className="hover:text-champagne transition-colors">
+              Release Schedule
+            </Link>
+            <Link href="/content-guide" className="hover:text-champagne transition-colors">
+              Content Guide
+            </Link>
+            <Link href="/faq" className="hover:text-champagne transition-colors">
+              FAQ
+            </Link>
             <Link href="/contact" className="hover:text-champagne transition-colors">
               Contact & Support
             </Link>
