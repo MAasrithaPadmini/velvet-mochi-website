@@ -13,11 +13,27 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
+
+  const LOCKOUT_THRESHOLD = 5;
+  const LOCKOUT_MS = 2 * 60 * 1000; // 2 minutes
+
+  function isLocked() {
+    return lockedUntil !== null && Date.now() < lockedUntil;
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
     setIsError(false);
+
+    if (mode === "login" && isLocked()) {
+      const secondsLeft = Math.ceil(((lockedUntil ?? 0) - Date.now()) / 1000);
+      setIsError(true);
+      setMessage(`Too many failed attempts. Please wait ${secondsLeft}s before trying again.`);
+      return;
+    }
 
     if (!email || !password) {
       setIsError(true);
@@ -52,8 +68,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     if (mode === "login") {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setIsError(true);
-        setMessage(error.message);
+        const attempts = failedAttempts + 1;
+        setFailedAttempts(attempts);
+        if (attempts >= LOCKOUT_THRESHOLD) {
+          setLockedUntil(Date.now() + LOCKOUT_MS);
+          setIsError(true);
+          setMessage(`Too many failed attempts. Please wait ${Math.ceil(LOCKOUT_MS / 1000)}s before trying again.`);
+        } else {
+          setIsError(true);
+          setMessage(error.message);
+        }
         setLoading(false);
         return;
       }
@@ -63,6 +87,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         setLoading(false);
         return;
       }
+      setFailedAttempts(0);
       // Wait a tick so the cookie is fully written, then hard-redirect.
       setMessage("Signed in. Redirecting...");
       await new Promise((r) => setTimeout(r, 300));
@@ -194,7 +219,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       )}
 
       <button
-        disabled={loading}
+        disabled={loading || (mode === "login" && isLocked())}
         className="mt-6 w-full rounded-full bg-champagne px-5 py-3 font-semibold text-velvet disabled:opacity-60"
       >
         {loading ? "Working..." : mode === "login" ? "Enter the library" : "Create account"}

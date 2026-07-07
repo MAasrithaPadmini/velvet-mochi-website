@@ -135,14 +135,17 @@ export function ReaderSidebar({
         {bookmarked ? "Bookmarked" : "Bookmark this chapter"}
       </button>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-3 gap-2">
         {prevNumber !== null ? (
           <Link href={`/stories/${story.slug}/chapters/${prevNumber}`} className="rounded-full border border-cream/12 px-3 py-2 text-center text-sm text-cream/80">
-            ← Previous
+            ← Prev
           </Link>
         ) : (
           <div className="rounded-full border border-cream/8 px-3 py-2 text-center text-sm text-cream/35">←</div>
         )}
+        <Link href={`/stories/${story.slug}`} className="rounded-full border border-cream/12 bg-cream/4 px-3 py-2 text-center text-sm text-cream/80">
+          Chapters
+        </Link>
         {nextNumber !== null ? (
           <Link href={`/stories/${story.slug}/chapters/${nextNumber}`} className="rounded-full bg-cream/8 px-3 py-2 text-center text-sm text-cream/80">
             Next →

@@ -1,36 +1,37 @@
-VELVET MOCHI - FIXES BATCH 3
+VELVET MOCHI - FIXES BATCH 4
 ================================================
 
 FILES CHANGED / ADDED
 ----------------------
-1. app/faq/page.tsx (NEW)
-   - Answers common questions: is it free, do you need an account,
-     what the age gate is, how to report issues, how to delete your
-     account, whether it's fan fiction, etc.
+1. components/reader-controls.tsx (NEW)
+   - Font size control (S/M/L/XL) and reading width control
+     (Narrow/Normal/Wide), shown above each chapter's text.
+   - Preferences persist per-device via localStorage, so a reader's
+     choice sticks across chapters and future visits.
 
-2. app/content-guide/page.tsx (NEW)
-   - Dynamically pulls every unique content/trigger warning tag
-     actually used across your published stories (queries your live
-     Supabase data -- doesn't hardcode assumptions) and shows a plain
-     explanation for each. Falls back to a generic note for any tag
-     not in the built-in dictionary, so it never breaks if you add a
-     new warning label later.
+2. app/stories/[slug]/chapters/[chapter]/page.tsx (EDITED)
+   - Renders ReaderControls above the chapter text.
 
-3. app/schedule/page.tsx (NEW)
-   - Shows each published story with its chapter count, status, and
-     "last update: X days/weeks ago" -- computed from real published_at
-     timestamps in your chapters, not made up.
+3. components/reader-sidebar.tsx (EDITED)
+   - Previous/Next buttons now sit alongside a new "Chapters" button
+     that links back to the story's full chapter list -- so readers
+     always have a way back without hitting browser back button.
 
-4. components/footer.tsx (EDITED)
-   - Added links to Release Schedule, Content Guide, and FAQ so
-     they're discoverable site-wide.
+4. components/auth-form.tsx (EDITED) -- LOGIN RATE LIMITING
+   - After 5 failed login attempts, the form locks for 2 minutes and
+     shows a countdown-style message instead of letting further
+     attempts through.
 
-5. app/sitemap.ts (EDITED)
-   - Added /faq, /content-guide, /schedule, and /contact to your
-     sitemap so Google indexes them too.
+   IMPORTANT HONESTY NOTE: this is a client-side (browser-level) speed
+   bump, not a substitute for real server-side protection. The actual
+   line of defense against brute-force attacks is Supabase Auth itself,
+   which already rate-limits sign-in attempts per IP by default on
+   their servers. You can review/tighten those settings at:
+   Supabase Dashboard -> Authentication -> Rate Limits
+   This client-side lockout just gives legitimate users a clearer,
+   friendlier message instead of silently failing over and over.
 
 HOW TO APPLY
 ------------
-Copy each file into the same path in your project (paths shown above).
-The 3 page.tsx files are new -- create the folders/files fresh. The
-footer.tsx and sitemap.ts overwrite existing files. Commit and push.
+Copy each file into the same path in your project, overwriting the
+existing ones. Commit and push.

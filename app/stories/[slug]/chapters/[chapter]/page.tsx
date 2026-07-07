@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { ReaderSidebar } from "@/components/reader-sidebar";
+import { ReaderControls } from "@/components/reader-controls";
 import { CommentsList } from "@/components/comments-list";
 import { getChapter, getStory, listChapters } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
@@ -83,10 +84,13 @@ export default async function ChapterReaderPage({
       />
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">
-        <article
-          className="reader-prose glass rounded-[1.75rem] p-6 sm:p-10 font-display text-[1.2rem] sm:text-[1.35rem] leading-[1.85]"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        <div>
+          <ReaderControls />
+          <article
+            className="reader-prose glass rounded-[1.75rem] p-6 sm:p-10 font-display text-[1.2rem] sm:text-[1.35rem] leading-[1.85]"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+        </div>
         <ReaderSidebar
           story={story}
           chapter={currentChapter}
