@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { BookCover } from "@/components/story-card";
 import { ChapterList } from "@/components/chapter-list";
@@ -6,6 +7,39 @@ import { getStory, listChapters } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
 
 export const revalidate = 30;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const story = await getStory(slug);
+  if (!story || story.status === "draft") {
+    return { title: "Story | Velvet Mochi" };
+  }
+
+  const title = `${story.title} | Velvet Mochi`;
+  const description = story.synopsis?.slice(0, 160) || "A serialized dark romance on Velvet Mochi.";
+  const images = story.cover_url ? [{ url: story.cover_url, width: 800, height: 1200, alt: story.title }] : undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title: story.title,
+      description,
+      type: "book",
+      images,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: story.title,
+      description,
+      images: story.cover_url ? [story.cover_url] : undefined,
+    },
+  };
+}
 
 export default async function StoryDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

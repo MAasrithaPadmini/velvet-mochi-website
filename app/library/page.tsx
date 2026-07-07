@@ -23,7 +23,7 @@ export default async function LibraryPage() {
             <p className="text-cream/65">The shelves are still being prepared. Check back soon.</p>
           </div>
         ) : (
-          <LibrarySearch stories={stories} />
+          <LibrarySearch stories={stories} isAdmin={Boolean(isAdmin)} />
         )}
       </section>
     </AppShell>

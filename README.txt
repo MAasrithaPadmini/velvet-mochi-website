@@ -1,37 +1,49 @@
-VELVET MOCHI - FIXES BATCH 4
+VELVET MOCHI - FIXES BATCH 5
 ================================================
 
-FILES CHANGED / ADDED
+FILES CHANGED
 ----------------------
-1. components/reader-controls.tsx (NEW)
-   - Font size control (S/M/L/XL) and reading width control
-     (Narrow/Normal/Wide), shown above each chapter's text.
-   - Preferences persist per-device via localStorage, so a reader's
-     choice sticks across chapters and future visits.
+1. components/library-search.tsx (REWRITTEN)
+   Previously: the "Genre", "Universe", "Warnings" buttons didn't
+   actually filter by a *specific* genre or universe -- they just
+   checked whether the field existed at all, so they barely narrowed
+   results. The "Draft" filter button was also visible to every
+   visitor, including regular readers who never have draft stories to
+   see -- a confusing dead-end filter.
 
-2. app/stories/[slug]/chapters/[chapter]/page.tsx (EDITED)
-   - Renders ReaderControls above the chapter text.
+   Now:
+   - Real dropdown for Genre (populated from your actual stories'
+     genre values)
+   - Real dropdown for Universe (same, from actual data)
+   - Status dropdown: Ongoing / Completed for everyone, with a
+     "Draft (admin only)" option that ONLY appears when isAdmin is
+     true
+   - A toggle button for "Has content warnings"
+   - A friendly empty-state message when filters match nothing
 
-3. components/reader-sidebar.tsx (EDITED)
-   - Previous/Next buttons now sit alongside a new "Chapters" button
-     that links back to the story's full chapter list -- so readers
-     always have a way back without hitting browser back button.
+2. app/library/page.tsx (EDITED)
+   - Passes isAdmin down to LibrarySearch so the Draft filter is
+     correctly hidden from regular readers.
 
-4. components/auth-form.tsx (EDITED) -- LOGIN RATE LIMITING
-   - After 5 failed login attempts, the form locks for 2 minutes and
-     shows a countdown-style message instead of letting further
-     attempts through.
+3. app/stories/[slug]/page.tsx (EDITED) -- FIXES MISSING SHARE IMAGES
+   Previously: this page had NO per-story metadata at all, so sharing
+   any story link on WhatsApp/Facebook/Twitter showed your generic
+   homepage title and description -- never the actual story's cover
+   or synopsis.
 
-   IMPORTANT HONESTY NOTE: this is a client-side (browser-level) speed
-   bump, not a substitute for real server-side protection. The actual
-   line of defense against brute-force attacks is Supabase Auth itself,
-   which already rate-limits sign-in attempts per IP by default on
-   their servers. You can review/tighten those settings at:
-   Supabase Dashboard -> Authentication -> Rate Limits
-   This client-side lockout just gives legitimate users a clearer,
-   friendlier message instead of silently failing over and over.
+   Now: added generateMetadata() that builds a unique title,
+   description (from the story's synopsis), and a proper social share
+   image using the story's actual cover_url -- for both Open Graph
+   (Facebook/WhatsApp) and Twitter Card previews.
 
 HOW TO APPLY
 ------------
 Copy each file into the same path in your project, overwriting the
 existing ones. Commit and push.
+
+NOTE
+----
+After deploying, if you want to double check the share preview looks
+right, use Facebook's Sharing Debugger or WhatsApp's own preview (paste
+a story link into a WhatsApp chat draft) -- cached old previews can
+take a little while to refresh even after the fix is live.
