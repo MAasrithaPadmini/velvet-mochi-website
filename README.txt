@@ -1,73 +1,37 @@
-VELVET MOCHI - FIXES BATCH 7 (AUTOMATIC CHAPTER NEWSLETTER EMAILS)
-=====================================================================
+VELVET MOCHI - BUILD FIX (unsubscribe page crash)
+====================================================
 
-WHAT WAS ACTUALLY WRONG
---------------------------
-Subscribing worked fine. But nothing in your code ever automatically
-emailed subscribers when a chapter went live -- uploading a chapter
-only created an in-app notification (the bell icon). Sending an email
-required YOU to manually go to /dashboard/newsletter, write a subject
-and message, and click Send. So subscribing + uploading a chapter with
-no manual send in between correctly produced silence.
+WHAT WENT WRONG
+------------------
+app/unsubscribe/page.tsx had "use client" at the top, but it also
+imported AppShell (a server component that reads cookies to check
+who's logged in). In Next.js App Router, a file marked "use client"
+gets bundled for the browser -- and browser code can't use
+next/headers (cookies()), which AppShell's auth check depends on.
+That's exactly what the build error was pointing at.
 
-⚠️ YOU STILL NEED RESEND CONFIGURED FOR ANY OF THIS TO SEND
---------------------------------------------------------------
-None of this will actually deliver emails until you have:
-1. A Resend account (resend.com) with a verified sending domain
-   (e.g. velvetmochi.com -- involves adding DNS records at Namecheap)
-2. These environment variables set in Vercel:
-   - RESEND_API_KEY
-   - NEWSLETTER_FROM_EMAIL (must match your verified domain, e.g.
-     newsletter@velvetmochi.com)
-   - NEWSLETTER_FROM_NAME (e.g. "Velvet Mochi")
-3. Redeploy after adding them
+THE FIX
+---------
+Split it into two files, matching the same pattern your existing
+login page already uses correctly:
 
-If these aren't set, chapter publishing will still work fine --
-the code silently skips the email step and logs a warning instead of
-failing, so it won't break your publishing flow.
+1. components/unsubscribe-form.tsx (NEW)
+   - The interactive part (the actual form, useSearchParams, fetch
+     calls) -- this is the ONLY part that needs "use client".
 
-FILES CHANGED / ADDED
-----------------------
-1. lib/newsletter.ts (NEW)
-   - Shared helper: notifySubscribersOfChapter() -- emails every
-     subscribed reader with the story title, chapter title, a "Read
-     now" button, and a personalized unsubscribe link.
-
-2. app/api/admin/chapters/route.ts (EDITED)
-   - When you create a chapter and set it to "published" immediately,
-     it now also emails subscribers (in addition to the existing
-     in-app notification).
-
-3. app/api/admin/chapters/[id]/route.ts (EDITED)
-   - Same, but for when you edit an existing draft/scheduled chapter
-     and change its status to "published".
-
-4. app/api/cron/publish-scheduled/route.ts (EDITED)
-   - Same, but for chapters that auto-publish via your scheduled
-     cron job.
-
-5. app/api/newsletter/unsubscribe/route.ts (NEW)
-   - Marks a subscriber's status as "unsubscribed" in the database.
-
-6. app/unsubscribe/page.tsx (NEW)
-   - Public unsubscribe page. If someone clicks the unsubscribe link
-     in an email (which includes their email as a URL parameter), it
-     unsubscribes them automatically. Also works as a manual form if
-     someone navigates there directly without a link.
-
-7. app/api/admin/newsletter/send/route.ts (EDITED)
-   - Manual newsletter sends (from your dashboard) now also include a
-     personalized unsubscribe link in the footer, matching the
-     automatic chapter emails.
+2. app/unsubscribe/page.tsx (REPLACED)
+   - Back to being a plain server component (no "use client").
+   - Renders AppShell normally, and renders <UnsubscribeForm /> inside
+     a Suspense boundary (required because it uses useSearchParams).
 
 HOW TO APPLY
 ------------
-Copy each file into the same path in your project. Commit and push.
-Then set up Resend + the env vars above if you haven't already.
+1. Delete app/unsubscribe/page.tsx from your project (the old broken
+   version) if it's still there.
+2. Add components/unsubscribe-form.tsx (new file).
+3. Add app/unsubscribe/page.tsx (replaces the old one).
+4. Commit and push. This should fix the failed build.
 
-TO TEST END TO END
--------------------
-1. Subscribe with a real email you can check.
-2. Publish a new chapter (or edit a draft chapter to "published").
-3. Check that inbox within a minute or two.
-4. Click "Unsubscribe" in that email and confirm it works.
+git add .
+git commit -m "Fix unsubscribe page build error (client/server component split)"
+git push
