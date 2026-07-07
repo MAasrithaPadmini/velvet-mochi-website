@@ -20,12 +20,17 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
   return res.ok;
 }
 
-function bodyToHtml(text: string): string {
+function bodyToHtml(text: string, recipientEmail: string): string {
+  const unsubUrl = `https://www.velvetmochi.com/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
 ${text
   .split(/\n\n+/)
   .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
   .join("\n")}
+<p style="margin-top:24px;font-size:12px;color:#888">
+  You're receiving this because you subscribed to Velvet Mochi updates.
+  <a href="${unsubUrl}" style="color:#888">Unsubscribe</a>
+</p>
 </body></html>`;
 }
 
@@ -51,7 +56,6 @@ export async function POST(request: NextRequest) {
   if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 400 });
 
   const emails = (subscribers ?? []).map((s: { email: string }) => s.email);
-  const html = bodyToHtml(message);
 
   // Send emails (in batches of 10 to avoid rate limits)
   let sent = 0;
@@ -59,7 +63,7 @@ export async function POST(request: NextRequest) {
   const batchSize = 10;
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
-    const results = await Promise.all(batch.map((email) => sendEmail(email, subject, html)));
+    const results = await Promise.all(batch.map((email) => sendEmail(email, subject, bodyToHtml(message, email))));
     sent += results.filter(Boolean).length;
     failed += results.filter((r) => !r).length;
   }

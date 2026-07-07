@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { estimateReadingMinutes } from "@/lib/markdown";
+import { notifySubscribersOfChapter } from "@/lib/newsletter";
 
 export const runtime = "nodejs";
 
@@ -58,6 +59,12 @@ export async function POST(request: NextRequest) {
         body: `Chapter ${chapter.number} of ${story.title} is live.`,
         link: `/stories/${story.slug}/chapters/${chapter.number}`,
       });
+      notifySubscribersOfChapter({
+        storyTitle: story.title,
+        storySlug: story.slug,
+        chapterTitle: chapter.title,
+        chapterNumber: chapter.number,
+      }).catch((e) => console.error("[newsletter] send failed", e));
     }
   }
 

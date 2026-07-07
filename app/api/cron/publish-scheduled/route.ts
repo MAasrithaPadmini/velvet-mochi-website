@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
+import { notifySubscribersOfChapter } from "@/lib/newsletter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -50,6 +51,18 @@ export async function GET(request: NextRequest) {
   });
 
   await svc.from("notifications").insert(notifications);
+
+  // Email newsletter subscribers for each chapter that just went live.
+  for (const c of due) {
+    const story = storyMap.get(c.story_id);
+    if (!story) continue;
+    notifySubscribersOfChapter({
+      storyTitle: story.title,
+      storySlug: story.slug,
+      chapterTitle: c.title,
+      chapterNumber: c.number,
+    }).catch((e) => console.error("[newsletter] send failed", e));
+  }
 
   return NextResponse.json({ published: due.length, ids });
 }

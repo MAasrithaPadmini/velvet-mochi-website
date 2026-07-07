@@ -1,61 +1,73 @@
-VELVET MOCHI - FIXES BATCH 6 (COMMENTS MODERATION)
-=====================================================
+VELVET MOCHI - FIXES BATCH 7 (AUTOMATIC CHAPTER NEWSLETTER EMAILS)
+=====================================================================
 
-⚠️ THIS BATCH REQUIRES A DATABASE STEP -- DO THIS FIRST
----------------------------------------------------------
-1. Go to your Supabase project -> SQL Editor -> New query
-2. Open supabase/migrations/comment_reports.sql from this zip
-3. Paste its full contents into the SQL editor and click Run
-   (this creates the comment_reports table safely -- it won't affect
-   any existing data)
+WHAT WAS ACTUALLY WRONG
+--------------------------
+Subscribing worked fine. But nothing in your code ever automatically
+emailed subscribers when a chapter went live -- uploading a chapter
+only created an in-app notification (the bell icon). Sending an email
+required YOU to manually go to /dashboard/newsletter, write a subject
+and message, and click Send. So subscribing + uploading a chapter with
+no manual send in between correctly produced silence.
+
+⚠️ YOU STILL NEED RESEND CONFIGURED FOR ANY OF THIS TO SEND
+--------------------------------------------------------------
+None of this will actually deliver emails until you have:
+1. A Resend account (resend.com) with a verified sending domain
+   (e.g. velvetmochi.com -- involves adding DNS records at Namecheap)
+2. These environment variables set in Vercel:
+   - RESEND_API_KEY
+   - NEWSLETTER_FROM_EMAIL (must match your verified domain, e.g.
+     newsletter@velvetmochi.com)
+   - NEWSLETTER_FROM_NAME (e.g. "Velvet Mochi")
+3. Redeploy after adding them
+
+If these aren't set, chapter publishing will still work fine --
+the code silently skips the email step and logs a warning instead of
+failing, so it won't break your publishing flow.
 
 FILES CHANGED / ADDED
 ----------------------
-1. supabase/migrations/comment_reports.sql (NEW)
-   - New table to store comment reports, with RLS so only admins can
-     read/update reports, and any signed-in reader can file one for
-     themselves (one report per person per comment).
+1. lib/newsletter.ts (NEW)
+   - Shared helper: notifySubscribersOfChapter() -- emails every
+     subscribed reader with the story title, chapter title, a "Read
+     now" button, and a personalized unsubscribe link.
 
-2. app/api/comments/[id]/report/route.ts (NEW)
-   - API route a reader hits to report a comment.
+2. app/api/admin/chapters/route.ts (EDITED)
+   - When you create a chapter and set it to "published" immediately,
+     it now also emails subscribers (in addition to the existing
+     in-app notification).
 
-3. components/comments-list.tsx (REWRITTEN)
-   - Added a "Report" flag button on every comment that isn't the
-     current user's own. Once reported, the button disables so the
-     same person can't spam-report the same comment repeatedly.
-   - Small toast message confirms the report was received.
+3. app/api/admin/chapters/[id]/route.ts (EDITED)
+   - Same, but for when you edit an existing draft/scheduled chapter
+     and change its status to "published".
 
-4. app/api/comments/route.ts (EDITED) -- SPAM PROTECTION
-   - Rate limiting: max 5 comments per 5 minutes per user.
-   - Blocks comments with more than 2 links (common spam pattern).
-   - Blocks comments with long runs of the same repeated character
-     (e.g. "aaaaaaaaaa...", a classic spam/flood pattern).
+4. app/api/cron/publish-scheduled/route.ts (EDITED)
+   - Same, but for chapters that auto-publish via your scheduled
+     cron job.
 
-5. app/dashboard/moderation/page.tsx (NEW)
-   - Admin-only page listing every pending report: who wrote the
-     comment, what it says, when it was reported, and why.
+5. app/api/newsletter/unsubscribe/route.ts (NEW)
+   - Marks a subscriber's status as "unsubscribed" in the database.
 
-6. components/moderation-queue.tsx (NEW)
-   - "Dismiss (not spam)" and "Delete comment" actions for each report.
+6. app/unsubscribe/page.tsx (NEW)
+   - Public unsubscribe page. If someone clicks the unsubscribe link
+     in an email (which includes their email as a URL parameter), it
+     unsubscribes them automatically. Also works as a manual form if
+     someone navigates there directly without a link.
 
-7. app/api/admin/moderation/[id]/route.ts (NEW)
-   - Backend route the moderation page calls to dismiss a report or
-     delete the comment + mark the report actioned.
-
-8. components/app-shell.tsx (EDITED)
-   - Added "Moderation" to the admin nav so you can find the new page.
+7. app/api/admin/newsletter/send/route.ts (EDITED)
+   - Manual newsletter sends (from your dashboard) now also include a
+     personalized unsubscribe link in the footer, matching the
+     automatic chapter emails.
 
 HOW TO APPLY
 ------------
-1. Run the SQL migration in Supabase FIRST (see above).
-2. Copy each file into the same path in your project.
-3. Commit and push.
-4. Visit /dashboard/moderation as an admin to see the new queue.
+Copy each file into the same path in your project. Commit and push.
+Then set up Resend + the env vars above if you haven't already.
 
-NOTE ON SPAM PROTECTION
--------------------------
-These are reasonable, lightweight heuristics (rate limit + link count +
-repeated-character detection) -- good enough to stop casual spam bots
-and flooding. They won't stop a sophisticated, targeted spammer. If you
-ever need stronger protection, a proper CAPTCHA (like Cloudflare Turnstile,
-which is free) on the comment form would be the next step up.
+TO TEST END TO END
+-------------------
+1. Subscribe with a real email you can check.
+2. Publish a new chapter (or edit a draft chapter to "published").
+3. Check that inbox within a minute or two.
+4. Click "Unsubscribe" in that email and confirm it works.
