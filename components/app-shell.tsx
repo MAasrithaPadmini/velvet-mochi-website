@@ -102,6 +102,7 @@ export function AdminNav() {
     ["/dashboard/chapters", "Chapters"],
     ["/dashboard/author", "Author Page"],
     ["/dashboard/notifications", "Notifications"],
+    ["/dashboard/moderation", "Moderation"],
     ["/dashboard/newsletter", "Newsletter"],
     ["/dashboard/analytics", "Analytics"],
     ["/dashboard/settings", "Settings"],

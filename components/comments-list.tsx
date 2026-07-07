@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Trash2, MessageSquare } from "lucide-react";
+import { Trash2, MessageSquare, Flag } from "lucide-react";
 import type { Comment } from "@/lib/types";
 
 export function CommentsList({
@@ -17,6 +17,8 @@ export function CommentsList({
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [reportedIds, setReportedIds] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState<string | null>(null);
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -40,10 +42,33 @@ export function CommentsList({
     return () => window.removeEventListener("velvet:comment-posted", handlePosted);
   }, [fetchComments]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
   async function remove(id: string) {
     if (!window.confirm("Delete this comment?")) return;
     const response = await fetch(`/api/comments/${id}`, { method: "DELETE" });
     if (response.ok) setComments((current) => current.filter((c) => c.id !== id));
+  }
+
+  async function report(id: string) {
+    if (reportedIds.has(id)) return;
+    if (!currentUserId) {
+      setToast("Login to report a comment.");
+      return;
+    }
+    if (!window.confirm("Report this comment for review by a moderator?")) return;
+    const response = await fetch(`/api/comments/${id}/report`, { method: "POST" });
+    if (response.ok) {
+      setReportedIds((prev) => new Set(prev).add(id));
+      setToast("Comment reported. A moderator will review it.");
+    } else {
+      const json = await response.json().catch(() => ({}));
+      setToast(json.error ?? "Failed to report. Please try again.");
+    }
   }
 
   return (
@@ -58,28 +83,53 @@ export function CommentsList({
         </p>
       )}
       <div className="mt-4 space-y-3">
-        {comments.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-cream/10 bg-cream/6 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="text-xs uppercase tracking-wide text-champagne/75">
-                  {c.display_name ?? "Anonymous reader"} · {new Date(c.created_at).toLocaleDateString()}
+        {comments.map((c) => {
+          const isOwn = c.user_id === currentUserId;
+          const alreadyReported = reportedIds.has(c.id);
+          return (
+            <div key={c.id} className="rounded-2xl border border-cream/10 bg-cream/6 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs uppercase tracking-wide text-champagne/75">
+                    {c.display_name ?? "Anonymous reader"} · {new Date(c.created_at).toLocaleDateString()}
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-cream/85">{c.body}</p>
                 </div>
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-cream/85">{c.body}</p>
+                <div className="flex shrink-0 gap-1.5">
+                  {!isOwn && (
+                    <button
+                      onClick={() => report(c.id)}
+                      disabled={alreadyReported}
+                      aria-label="Report comment"
+                      title={alreadyReported ? "Reported" : "Report this comment"}
+                      className={`grid size-8 place-items-center rounded-full border ${
+                        alreadyReported ? "border-cream/10 text-cream/25" : "border-cream/15 text-cream/50 hover:text-champagne"
+                      }`}
+                    >
+                      <Flag size={13} />
+                    </button>
+                  )}
+                  {(isOwn || isAdmin) && (
+                    <button
+                      onClick={() => remove(c.id)}
+                      aria-label="Delete comment"
+                      className="grid size-8 place-items-center rounded-full border border-rose/30 text-rose"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
               </div>
-              {(c.user_id === currentUserId || isAdmin) && (
-                <button
-                  onClick={() => remove(c.id)}
-                  aria-label="Delete comment"
-                  className="grid size-8 shrink-0 place-items-center rounded-full border border-rose/30 text-rose"
-                >
-                  <Trash2 size={13} />
-                </button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
+
+      {toast && (
+        <p className="mt-4 rounded-2xl border border-champagne/25 bg-champagne/10 p-3 text-xs text-champagne">
+          {toast}
+        </p>
+      )}
     </div>
   );
 }
