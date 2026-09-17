@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { listStories, listChapters } from "@/lib/repositories";
 
-const SITE_URL = "https://www.velvetmochi.com";
+const SITE_URL = "https://velvetmochi.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = [
