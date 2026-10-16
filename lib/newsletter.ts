@@ -1,9 +1,9 @@
 import { createServiceClient } from "@/lib/supabase/service";
+import { SITE_URL } from "@/lib/site";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "";
 const FROM_NAME = process.env.NEWSLETTER_FROM_NAME ?? "Velvet Mochi";
-const SITE_URL = "https://www.velvetmochi.com";
 
 async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
   try {

@@ -10,10 +10,9 @@ import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { renderChapterBody } from "@/lib/markdown";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
-
-const SITE_URL = "https://www.velvetmochi.com";
 
 // Shared between generateMetadata and the page so each request queries Supabase once.
 const loadStory = cache((slug: string) => getStory(slug));

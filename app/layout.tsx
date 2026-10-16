@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, Inter } from "next/font/google";
 import { Footer } from "@/components/footer";
 import "./globals.css";
+import { SITE_URL } from "@/lib/site";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -30,12 +31,12 @@ export const metadata: Metadata = {
     "Indian dark romance",
     "free romance reading",
   ],
-  metadataBase: new URL("https://www.velvetmochi.com"),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "Velvet Mochi",
     description: "Enter a moonlit library of serialized dark romance. New chapters daily.",
     type: "website",
-    url: "https://www.velvetmochi.com",
+    url: SITE_URL,
   },
   icons: {
     icon: "/favicon.svg",

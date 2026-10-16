@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
+import { SITE_URL } from "@/lib/site";
 
 export const runtime = "nodejs";
 
@@ -21,7 +22,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
 }
 
 function bodyToHtml(text: string, recipientEmail: string): string {
-  const unsubUrl = `https://www.velvetmochi.com/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+  const unsubUrl = `${SITE_URL}/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
 ${text
   .split(/\n\n+/)
