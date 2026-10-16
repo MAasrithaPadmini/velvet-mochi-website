@@ -1,11 +1,22 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { SITE_URL } from "@/lib/site";
+import { listUnsubscribeHeaders, unsubscribePageUrl } from "@/lib/unsubscribe-token";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "";
 const FROM_NAME = process.env.NEWSLETTER_FROM_NAME ?? "Velvet Mochi";
 
-async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+/**
+ * Sends one email through Resend. Pass `unsubscribeFor` on newsletter mail so the
+ * message carries one-click List-Unsubscribe headers for that recipient.
+ */
+export async function sendEmail(
+  to: string,
+  subject: string,
+  html: string,
+  options: { unsubscribeFor?: string } = {}
+): Promise<boolean> {
+  if (!RESEND_API_KEY || !FROM_EMAIL) return false;
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -13,7 +24,13 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: `${FROM_NAME} <${FROM_EMAIL}>`, to, subject, html }),
+      body: JSON.stringify({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to,
+        subject,
+        html,
+        headers: options.unsubscribeFor ? listUnsubscribeHeaders(options.unsubscribeFor) : undefined,
+      }),
     });
     return res.ok;
   } catch {
@@ -22,7 +39,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
 }
 
 function chapterEmailHtml(storyTitle: string, chapterTitle: string, chapterNumber: number, url: string, recipientEmail: string): string {
-  const unsubUrl = `${SITE_URL}/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+  const unsubUrl = unsubscribePageUrl(recipientEmail);
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
     <h2>${storyTitle}</h2>
     <p>Chapter ${chapterNumber}: ${chapterTitle} just went live.</p>
@@ -70,7 +87,9 @@ export async function notifySubscribersOfChapter(params: {
     const batch = emails.slice(i, i + batchSize);
     const results = await Promise.all(
       batch.map((email) =>
-        sendEmail(email, subject, chapterEmailHtml(params.storyTitle, params.chapterTitle, params.chapterNumber, url, email))
+        sendEmail(email, subject, chapterEmailHtml(params.storyTitle, params.chapterTitle, params.chapterNumber, url, email), {
+          unsubscribeFor: email,
+        })
       )
     );
     sent += results.filter(Boolean).length;

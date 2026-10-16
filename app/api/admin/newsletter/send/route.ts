@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
-import { SITE_URL } from "@/lib/site";
+import { sendEmail } from "@/lib/newsletter";
+import { unsubscribePageUrl } from "@/lib/unsubscribe-token";
 
 export const runtime = "nodejs";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "newsletter@yourdomain.com";
-const FROM_NAME = process.env.NEWSLETTER_FROM_NAME ?? "Your Newsletter";
-
-async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from: `${FROM_NAME} <${FROM_EMAIL}>`, to, subject, html }),
-  });
-  return res.ok;
-}
+const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "";
 
 function bodyToHtml(text: string, recipientEmail: string): string {
-  const unsubUrl = `${SITE_URL}/unsubscribe?email=${encodeURIComponent(recipientEmail)}`;
+  const unsubUrl = unsubscribePageUrl(recipientEmail);
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
 ${text
   .split(/\n\n+/)
@@ -39,8 +27,11 @@ export async function POST(request: NextRequest) {
   await requireAdmin();
   const svc = createServiceClient();
   if (!svc) return NextResponse.json({ error: "Supabase not configured" }, { status: 500 });
-  if (!RESEND_API_KEY)
-    return NextResponse.json({ error: "RESEND_API_KEY is not set. Add it to your environment variables." }, { status: 500 });
+  if (!RESEND_API_KEY || !FROM_EMAIL)
+    return NextResponse.json(
+      { error: "RESEND_API_KEY or NEWSLETTER_FROM_EMAIL is not set. Add them to your environment variables." },
+      { status: 500 }
+    );
 
   const body = await request.json().catch(() => ({}));
   const subject = String(body.subject ?? "").trim();
@@ -64,7 +55,7 @@ export async function POST(request: NextRequest) {
   const batchSize = 10;
   for (let i = 0; i < emails.length; i += batchSize) {
     const batch = emails.slice(i, i + batchSize);
-    const results = await Promise.all(batch.map((email) => sendEmail(email, subject, bodyToHtml(message, email))));
+    const results = await Promise.all(batch.map((email) => sendEmail(email, subject, bodyToHtml(message, email), { unsubscribeFor: email })));
     sent += results.filter(Boolean).length;
     failed += results.filter((r) => !r).length;
   }
