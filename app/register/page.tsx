@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { AuthForm } from "@/components/auth-form";
+
+export const metadata: Metadata = {
+  title: "Create an account | Velvet Mochi",
+  robots: { index: false, follow: true },
+};
 
 export default function RegisterPage() {
   return (

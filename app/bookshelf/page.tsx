@@ -1,11 +1,18 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { BookOpen, Bookmark as BookmarkIcon, Bell } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import type { Metadata } from "next";
+import { SignInPrompt } from "@/components/sign-in-prompt";
 
 export const dynamic = "force-dynamic";
+
+// Private, per-reader page: keep it out of search results.
+export const metadata: Metadata = {
+  title: "Your bookshelf | Velvet Mochi",
+  robots: { index: false, follow: false },
+};
 
 type ProgressRow = {
   story_id: string;
@@ -33,10 +40,26 @@ type NotificationRow = {
 
 export default async function BookshelfPage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/login?next=/bookshelf");
+  if (!profile) {
+    return (
+      <SignInPrompt
+        title="Your private bookshelf."
+        copy="Sign in to continue where you left off, keep bookmarks and get new-chapter alerts."
+        next="/bookshelf"
+      />
+    );
+  }
 
   const supabase = await createClient();
-  if (!supabase) redirect("/login?next=/bookshelf");
+  if (!supabase) {
+    return (
+      <SignInPrompt
+        title="Your private bookshelf."
+        copy="Sign in to continue where you left off, keep bookmarks and get new-chapter alerts."
+        next="/bookshelf"
+      />
+    );
+  }
 
   const [progressRes, bookmarksRes, notificationsRes, storiesRes, chaptersRes] = await Promise.all([
     supabase

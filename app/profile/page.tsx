@@ -1,18 +1,41 @@
-import { redirect } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { SignOutButton } from "@/components/auth-form";
 import { AccountSettings } from "@/components/account-settings";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import type { Metadata } from "next";
+import { SignInPrompt } from "@/components/sign-in-prompt";
 
 export const dynamic = "force-dynamic";
 
+// Private, per-reader page: keep it out of search results.
+export const metadata: Metadata = {
+  title: "Your profile | Velvet Mochi",
+  robots: { index: false, follow: false },
+};
+
 export default async function ProfilePage() {
   const profile = await getCurrentProfile();
-  if (!profile) redirect("/login?next=/profile");
+  if (!profile) {
+    return (
+      <SignInPrompt
+        title="Your reader profile."
+        copy="Sign in to see your reading stats, achievements and account settings."
+        next="/profile"
+      />
+    );
+  }
 
   const supabase = await createClient();
-  if (!supabase) redirect("/login");
+  if (!supabase) {
+    return (
+      <SignInPrompt
+        title="Your reader profile."
+        copy="Sign in to see your reading stats, achievements and account settings."
+        next="/profile"
+      />
+    );
+  }
 
   const [progressRes, bookmarksRes, commentsRes] = await Promise.all([
     supabase.from("reading_progress").select("chapter_id, progress, updated_at").eq("user_id", profile.id),
