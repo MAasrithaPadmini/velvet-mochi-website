@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { sendEmail } from "@/lib/newsletter";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { normalizeEmail, subscribeConfirmUrl } from "@/lib/unsubscribe-token";
+import { normalizeEmail, subscribeConfirmUrl, unsubscribePageUrl } from "@/lib/unsubscribe-token";
 
 export const runtime = "nodejs";
 
@@ -17,6 +17,14 @@ function confirmEmailHtml(link: string): string {
     <p>Tap the button to start getting an email whenever a new chapter goes live.</p>
     <p><a href="${link}" style="display:inline-block;background:#c9a876;color:#111;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:600">Yes, subscribe me</a></p>
     <p style="margin-top:24px;font-size:12px;color:#888">This link works for 7 days. If you didn't sign up, ignore this email and you won't hear from us.</p>
+  </body></html>`;
+}
+
+function alreadySubscribedHtml(unsubscribeLink: string): string {
+  return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
+    <h2>You're already getting Velvet Mochi chapter alerts</h2>
+    <p>Someone (hopefully you) just signed up with this address, but it's already on the list, so there's nothing more to do. We'll keep emailing you when new chapters go live.</p>
+    <p style="margin-top:24px;font-size:12px;color:#888">Don't want these emails? <a href="${unsubscribeLink}" style="color:#888">Unsubscribe</a>.</p>
   </body></html>`;
 }
 
@@ -51,14 +59,24 @@ export async function POST(request: NextRequest) {
     .eq("email", email)
     .maybeSingle();
 
-  if (existing?.status !== "subscribed") {
+  // Always email the address, so the reader gets feedback either way, while the
+  // on-screen reply stays the same (it doesn't reveal who is subscribed).
+  let sent: boolean;
+  if (existing?.status === "subscribed") {
+    sent = await sendEmail(
+      email,
+      "You're already subscribed to Velvet Mochi",
+      alreadySubscribedHtml(unsubscribePageUrl(email)),
+      { unsubscribeFor: email }
+    );
+  } else {
     const link = subscribeConfirmUrl(email);
     if (!link) return NextResponse.json({ error: "Not configured" }, { status: 500 });
-    const sent = await sendEmail(email, "Confirm your Velvet Mochi chapter alerts", confirmEmailHtml(link));
-    if (!sent) {
-      console.error("[newsletter] confirmation email failed to send");
-      return NextResponse.json({ error: "We couldn't send the confirmation email. Please try again." }, { status: 502 });
-    }
+    sent = await sendEmail(email, "Confirm your Velvet Mochi chapter alerts", confirmEmailHtml(link));
+  }
+  if (!sent) {
+    console.error("[newsletter] signup email failed to send");
+    return NextResponse.json({ error: "We couldn't send the confirmation email. Please try again." }, { status: 502 });
   }
 
   return NextResponse.json(CHECK_INBOX);
