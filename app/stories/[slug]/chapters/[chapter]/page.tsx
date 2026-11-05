@@ -8,10 +8,10 @@ import { CommentsList } from "@/components/comments-list";
 import { getChapter, getStory, listChapters } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { createServiceClient } from "@/lib/supabase/service";
 import { renderChapterBody } from "@/lib/markdown";
 import { SITE_URL } from "@/lib/site";
 import { chapterLabel } from "@/lib/chapter-label";
+import { ViewTracker } from "@/components/view-tracker";
 
 export const dynamic = "force-dynamic";
 
@@ -121,13 +121,6 @@ export default async function ChapterReaderPage({
     }
   }
 
-  // Increment views (fire-and-forget, only for published chapters)
-  if (currentChapter.status === "published") {
-    const svc = createServiceClient();
-    if (svc) {
-      svc.rpc("increment_chapter_views", { chapter_id_input: currentChapter.id }).then(() => {});
-    }
-  }
 
   const sortedNumbers = allChapters
     .filter((c) => c.status === "published" || isAdmin)
@@ -165,6 +158,9 @@ export default async function ChapterReaderPage({
           nextNumber={nextNumber}
         />
       </section>
+
+      {/* Views are counted from the reader's browser; the author's own reads don't count. */}
+      {currentChapter.status === "published" && !isAdmin && <ViewTracker chapterId={currentChapter.id} />}
 
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <CommentsList

@@ -28,11 +28,24 @@ export async function getStory(slug: string): Promise<Story | null> {
   return data as Story;
 }
 
-export async function listChapters(storySlug?: string, includeDrafts = false): Promise<Chapter[]> {
+// Everything except the chapter text. Lists (story page, prev/next, schedule,
+// sitemap) never show the body, and selecting it pulled the full text of every
+// chapter of the story on each page view.
+const CHAPTER_LIST_COLS =
+  "id, story_id, story_slug, story_title, number, title, status, reading_minutes, views, scheduled_for, published_at, created_at, updated_at";
+
+export async function listChapters(
+  storySlug?: string,
+  includeDrafts = false,
+  { withBody = false }: { withBody?: boolean } = {}
+): Promise<Chapter[]> {
   const supabase = await createClient();
   if (!supabase) return [];
 
-  let query = supabase.from("chapter_library").select("*").order("number", { ascending: true });
+  let query = supabase
+    .from("chapter_library")
+    .select(withBody ? "*" : CHAPTER_LIST_COLS)
+    .order("number", { ascending: true });
   if (storySlug) query = query.eq("story_slug", storySlug);
   if (!includeDrafts) query = query.eq("status", "published");
 
@@ -41,11 +54,12 @@ export async function listChapters(storySlug?: string, includeDrafts = false): P
     console.error("[listChapters]", error.message);
     return [];
   }
-  return (data ?? []) as Chapter[];
+  return (data ?? []) as unknown as Chapter[];
 }
 
 export async function listAllChaptersForAdmin(storySlug?: string): Promise<Chapter[]> {
-  return listChapters(storySlug, true);
+  // The dashboard editor needs the text.
+  return listChapters(storySlug, true, { withBody: true });
 }
 
 export async function getChapter(storySlug: string, number: number): Promise<Chapter | null> {
