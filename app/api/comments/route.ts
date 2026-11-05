@@ -4,13 +4,28 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const runtime = "nodejs";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Public comment feed for ONE story or chapter. It must not be usable to dump
+// every comment on the site, and it never exposes other readers' account IDs.
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const story_id = url.searchParams.get("story_id");
   const chapter_id = url.searchParams.get("chapter_id");
 
+  if (!story_id && !chapter_id) {
+    return NextResponse.json({ error: "story_id or chapter_id required" }, { status: 400 });
+  }
+  if ((story_id && !UUID_RE.test(story_id)) || (chapter_id && !UUID_RE.test(chapter_id))) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+
   const svc = createServiceClient();
   if (!svc) return NextResponse.json({ comments: [] });
+
+  // Who is asking, so their own comments can be marked as theirs.
+  const supabase = await createClient();
+  const viewerId = supabase ? (await supabase.auth.getUser()).data.user?.id ?? null : null;
 
   let query = svc
     .from("comments")
@@ -22,7 +37,10 @@ export async function GET(request: NextRequest) {
   if (chapter_id) query = query.eq("chapter_id", chapter_id);
 
   const { data: comments, error } = await query;
-  if (error) return NextResponse.json({ comments: [], error: error.message });
+  if (error) {
+    console.error("[comments] load failed", error);
+    return NextResponse.json({ comments: [] });
+  }
 
   const userIds = Array.from(new Set((comments ?? []).map((c) => c.user_id)));
   let profileMap = new Map<string, { display_name: string; avatar_url: string | null }>();
@@ -35,7 +53,13 @@ export async function GET(request: NextRequest) {
   }
 
   const enriched = (comments ?? []).map((c) => ({
-    ...c,
+    id: c.id,
+    story_id: c.story_id,
+    chapter_id: c.chapter_id,
+    body: c.body,
+    created_at: c.created_at,
+    // Only the viewer's own id is ever sent back (used to show their delete button).
+    user_id: viewerId && c.user_id === viewerId ? c.user_id : null,
     display_name: profileMap.get(c.user_id)?.display_name ?? "Moonlit Reader",
     avatar_url: profileMap.get(c.user_id)?.avatar_url ?? null,
   }));

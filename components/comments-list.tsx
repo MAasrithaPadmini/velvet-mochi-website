@@ -84,7 +84,7 @@ export function CommentsList({
       )}
       <div className="mt-4 space-y-3">
         {comments.map((c) => {
-          const isOwn = c.user_id === currentUserId;
+          const isOwn = Boolean(currentUserId) && c.user_id === currentUserId;
           const alreadyReported = reportedIds.has(c.id);
           return (
             <div key={c.id} className="rounded-2xl border border-cream/10 bg-cream/6 p-4">

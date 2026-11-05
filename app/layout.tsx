@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   openGraph: {
     title: "Velvet Mochi",
-    description: "Enter a moonlit library of serialized dark romance. New chapters daily.",
+    description: "Enter a moonlit library of serialized dark romance. New chapters released regularly.",
     type: "website",
     url: SITE_URL,
   },
