@@ -12,26 +12,13 @@ import { renderChapterBody } from "@/lib/markdown";
 import { SITE_URL } from "@/lib/site";
 import { chapterLabel } from "@/lib/chapter-label";
 import { ViewTracker } from "@/components/view-tracker";
+import { excerpt } from "@/lib/plain-text";
 
 export const dynamic = "force-dynamic";
 
 // Shared between generateMetadata and the page so each request queries Supabase once.
 const loadStory = cache((slug: string) => getStory(slug));
 const loadChapter = cache((slug: string, number: number) => getChapter(slug, number));
-
-function toPlainExcerpt(markdown: string, max = 155): string {
-  const text = markdown
-    .replace(/<[^>]+>/g, " ") // html tags
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // links -> text
-    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "") // headings, quotes, lists
-    .replace(/[*_~`]+/g, "") // emphasis / code marks
-    .replace(/\s+/g, " ")
-    .trim();
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  return `${cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : max)}…`;
-}
 
 export async function generateMetadata({
   params,
@@ -50,7 +37,7 @@ export async function generateMetadata({
   const label = chapterLabel(currentChapter);
   const title = `${label} – ${story.title} | Velvet Mochi`;
   const description =
-    toPlainExcerpt(currentChapter.body ?? "") || `Read ${label} of ${story.title} on Velvet Mochi.`;
+    excerpt(currentChapter.body, 155) || `Read ${label} of ${story.title} on Velvet Mochi.`;
   const url = `${SITE_URL}/stories/${story.slug}/chapters/${currentChapter.number}`;
   const ogTitle = `${label} – ${story.title}`;
 

@@ -6,6 +6,7 @@ import { NewsletterForm } from "@/components/newsletter-form";
 import { listStories } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { toPlainText } from "@/lib/plain-text";
 
 export const revalidate = 60;
 
@@ -79,12 +80,13 @@ export default async function HomePage() {
           <div className="glass rounded-[2rem] p-4">
             <BookCover story={featured} large />
             <h2 className="mt-5 font-display text-3xl sm:text-4xl text-cream">{featured.title}</h2>
-            <p className="mt-2 text-sm leading-6 text-cream/68">{featured.synopsis}</p>
+            <p className="mt-2 text-sm leading-6 text-cream/68">{toPlainText(featured.synopsis)}</p>
           </div>
         )}
       </section>
 
-      {stories.length > 1 && (
+      {/* Only show the shelf once it has at least two stories besides the featured one. */}
+      {stories.length >= 3 && (
         <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>

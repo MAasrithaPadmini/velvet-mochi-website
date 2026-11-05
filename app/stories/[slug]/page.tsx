@@ -5,6 +5,7 @@ import { BookCover } from "@/components/story-card";
 import { ChapterList } from "@/components/chapter-list";
 import { getStory, listChapters } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
+import { excerpt, toPlainText } from "@/lib/plain-text";
 
 export const revalidate = 30;
 
@@ -20,7 +21,7 @@ export async function generateMetadata({
   }
 
   const title = `${story.title} | Velvet Mochi`;
-  const description = story.synopsis?.slice(0, 160) || "A serialized dark romance on Velvet Mochi.";
+  const description = excerpt(story.synopsis, 160) || "A serialized dark romance on Velvet Mochi.";
   const images = story.cover_url ? [{ url: story.cover_url, width: 800, height: 1200, alt: story.title }] : undefined;
 
   return {
@@ -54,7 +55,7 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ sl
 
   return (
     <AppShell>
-      <PageHeader eyebrow={story.universe} title={story.title} copy={story.synopsis} />
+      <PageHeader eyebrow={story.universe} title={story.title} copy={toPlainText(story.synopsis)} />
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:px-8">
         <div className="space-y-5">
