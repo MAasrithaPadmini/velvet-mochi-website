@@ -5,6 +5,7 @@ import { useState } from "react";
 
 export function NewsletterForm() {
   const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState(""); // honeypot, hidden from people
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -16,11 +17,14 @@ export function NewsletterForm() {
     const response = await fetch("/api/newsletter", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email.trim() }),
+      body: JSON.stringify({ email: email.trim(), website }),
     });
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (response.ok) {
-      setMessage({ text: "Welcome to the moonlight. You'll be told when chapters land.", ok: true });
+      setMessage({
+        text: "Almost there — check your inbox (and spam folder) and tap the link to confirm.",
+        ok: true,
+      });
       setEmail("");
     } else {
       setMessage({ text: json.error ?? "Could not subscribe.", ok: false });
@@ -29,7 +33,7 @@ export function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={submit} className="glass rounded-[1.75rem] p-5 sm:p-6">
+    <form onSubmit={submit} className="glass relative rounded-[1.75rem] p-5 sm:p-6">
       <div className="flex items-center gap-2 text-champagne">
         <Mail size={18} />
         <h3 className="font-display text-2xl text-cream">Chapter alerts in your inbox</h3>
@@ -37,6 +41,17 @@ export function NewsletterForm() {
       <p className="mt-2 text-sm text-cream/60">
         Subscribe to be notified when new chapters go live. No spam, just moonlight.
       </p>
+      {/* Honeypot: invisible to people, bots fill it in and get silently ignored. */}
+      <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        className="absolute left-[-9999px] h-0 w-0 opacity-0"
+      />
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <input
           type="email"

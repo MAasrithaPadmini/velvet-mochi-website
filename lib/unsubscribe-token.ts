@@ -44,6 +44,35 @@ export function unsubscribeOneClickUrl(email: string): string {
   return `${SITE_URL}/api/newsletter/unsubscribe?${query(email)}`;
 }
 
+// --- Subscribe confirmation (double opt-in) -------------------------------
+// Nothing is stored until the reader clicks this link, so the token carries the
+// email and an expiry and is checked statelessly.
+
+const SUBSCRIBE_LINK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+function signSubscribe(email: string, exp: number): string | null {
+  const key = secret();
+  if (!key) return null;
+  return createHmac("sha256", key).update(`subscribe:${normalizeEmail(email)}:${exp}`).digest("base64url");
+}
+
+export function subscribeConfirmUrl(email: string): string | null {
+  const exp = Date.now() + SUBSCRIBE_LINK_TTL_MS;
+  const token = signSubscribe(email, exp);
+  if (!token) return null;
+  return `${SITE_URL}/newsletter/confirm?email=${encodeURIComponent(normalizeEmail(email))}&exp=${exp}&token=${encodeURIComponent(token)}`;
+}
+
+export function verifySubscribeToken(email: string, exp: number, token: string): "ok" | "expired" | "invalid" {
+  if (!Number.isFinite(exp) || !token) return "invalid";
+  const expected = signSubscribe(email, exp);
+  if (!expected) return "invalid";
+  const a = Buffer.from(expected);
+  const b = Buffer.from(token);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return "invalid";
+  return exp < Date.now() ? "expired" : "ok";
+}
+
 /** Headers to attach to every newsletter email. */
 export function listUnsubscribeHeaders(email: string): Record<string, string> {
   return {
