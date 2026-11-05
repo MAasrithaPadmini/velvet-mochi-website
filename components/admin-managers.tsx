@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarClock, Eye, FileText, Save, Trash2, Upload } from "lucide-react";
 import type { Chapter, Story } from "@/lib/types";
+import { COVER_ASPECT, CoverCropper } from "@/components/cover-cropper";
 
 // =======================================================================
 // STORY MANAGER
@@ -69,6 +70,10 @@ export function StoryManager({ initialStories }: { initialStories: Story[] }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<StoryForm>(emptyStory);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  // Image waiting in the crop window, and a preview of the cropped result.
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const slugDirty = useRef(false);
@@ -86,6 +91,7 @@ export function StoryManager({ initialStories }: { initialStories: Story[] }) {
     setEditingId(story.id);
     setForm(storyToForm(story));
     setCoverFile(null);
+    setCoverPreview(null);
     setMessage({ text: `Editing "${story.title}"`, ok: true });
     slugDirty.current = true;
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -95,6 +101,7 @@ export function StoryManager({ initialStories }: { initialStories: Story[] }) {
     setEditingId(null);
     setForm(emptyStory);
     setCoverFile(null);
+    setCoverPreview(null);
     setMessage(null);
     slugDirty.current = false;
   }
@@ -165,6 +172,7 @@ export function StoryManager({ initialStories }: { initialStories: Story[] }) {
       setEditingId(story.id);
       setForm(storyToForm(story));
       setCoverFile(null);
+      setCoverPreview(null);
       setMessage({ text: isEditing ? "Story updated." : "Story created.", ok: true });
       router.refresh();
     } catch (error) {
@@ -250,18 +258,60 @@ export function StoryManager({ initialStories }: { initialStories: Story[] }) {
           />
         </Field>
 
-        <Field label="Cover image (max 5 MB)">
+        <Field label="Cover image">
           <input
+            ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            onChange={(e) => setCoverFile(e.target.files?.[0] ?? null)}
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = ""; // allow picking the same file again
+              if (!file) return;
+              if (file.size > 15 * 1024 * 1024) {
+                setMessage({ text: "That image is over 15 MB. Please pick a smaller one.", ok: false });
+                return;
+              }
+              setCropSrc(URL.createObjectURL(file));
+            }}
             className="mt-2 w-full rounded-2xl border border-cream/10 bg-cream/7 px-4 py-3 text-cream file:mr-3 file:rounded-full file:border-0 file:bg-champagne file:px-3 file:py-2 file:text-velvet"
           />
+          <span className="mt-1 block text-xs text-cream/50">You&apos;ll be able to crop it before saving.</span>
         </Field>
-        {form.cover_url && (
-          <a href={form.cover_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm text-champagne">
-            View current cover
-          </a>
+
+        {(coverPreview || form.cover_url) && (
+          <div className="mt-3">
+            <div
+              className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-cream/10"
+              style={{ aspectRatio: String(COVER_ASPECT) }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={coverPreview ?? form.cover_url ?? ""} alt="Cover preview" className="h-full w-full object-cover" />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-3 text-sm">
+              {coverPreview ? (
+                <span className="text-champagne">New cover ready. Click Save to publish it.</span>
+              ) : (
+                <button type="button" onClick={() => form.cover_url && setCropSrc(form.cover_url)} className="text-champagne underline">
+                  Adjust crop of current cover
+                </button>
+              )}
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="text-cream/70 underline">
+                Choose a different image
+              </button>
+            </div>
+          </div>
+        )}
+
+        {cropSrc && (
+          <CoverCropper
+            src={cropSrc}
+            onCancel={() => setCropSrc(null)}
+            onDone={(file, previewUrl) => {
+              setCoverFile(file);
+              setCoverPreview(previewUrl);
+              setCropSrc(null);
+            }}
+          />
         )}
 
         <button

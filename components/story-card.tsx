@@ -8,13 +8,15 @@ export function BookCover({ story, large = false }: { story: Story; large?: bool
   const height = large ? "min-h-[340px]" : "min-h-[260px]";
 
   if (story.cover_url) {
+    // Fixed 4:3 frame, matching the dashboard's crop window, so covers look the
+    // same on every page and screen size.
     return (
-      <div className={`${height} relative overflow-hidden rounded-[1.5rem] shadow-velvet`}>
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[1.5rem] shadow-velvet">
         <Image
           src={story.cover_url}
           alt={story.title}
           fill
-          sizes="(max-width: 768px) 100vw, 33vw"
+          sizes={large ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 768px) 100vw, 33vw"}
           className="object-cover"
           priority={large}
         />
