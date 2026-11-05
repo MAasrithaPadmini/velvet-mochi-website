@@ -16,7 +16,12 @@ export async function sendEmail(
   html: string,
   options: { unsubscribeFor?: string } = {}
 ): Promise<boolean> {
-  if (!RESEND_API_KEY || !FROM_EMAIL) return false;
+  if (!RESEND_API_KEY || !FROM_EMAIL) {
+    console.error(
+      `[email] not sent: missing ${!RESEND_API_KEY ? "RESEND_API_KEY" : ""} ${!FROM_EMAIL ? "NEWSLETTER_FROM_EMAIL" : ""}`.trim()
+    );
+    return false;
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -32,8 +37,14 @@ export async function sendEmail(
         headers: options.unsubscribeFor ? listUnsubscribeHeaders(options.unsubscribeFor) : undefined,
       }),
     });
+    if (!res.ok) {
+      // Resend explains the problem in the body (e.g. unverified domain, invalid key).
+      const detail = await res.text().catch(() => "");
+      console.error(`[email] Resend rejected the email (HTTP ${res.status}) from ${FROM_EMAIL}: ${detail.slice(0, 500)}`);
+    }
     return res.ok;
-  } catch {
+  } catch (e) {
+    console.error("[email] could not reach Resend", e);
     return false;
   }
 }
