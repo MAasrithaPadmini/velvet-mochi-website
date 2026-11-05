@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { renderChapterBody } from "@/lib/markdown";
 import { SITE_URL } from "@/lib/site";
+import { chapterLabel } from "@/lib/chapter-label";
 
 export const dynamic = "force-dynamic";
 
@@ -46,11 +47,12 @@ export async function generateMetadata({
     return { title: "Chapter not found | Velvet Mochi", robots: { index: false } };
   }
 
-  const title = `${currentChapter.title} – ${story.title} | Velvet Mochi`;
+  const label = chapterLabel(currentChapter);
+  const title = `${label} – ${story.title} | Velvet Mochi`;
   const description =
-    toPlainExcerpt(currentChapter.body ?? "") || `Read ${currentChapter.title} of ${story.title} on Velvet Mochi.`;
+    toPlainExcerpt(currentChapter.body ?? "") || `Read ${label} of ${story.title} on Velvet Mochi.`;
   const url = `${SITE_URL}/stories/${story.slug}/chapters/${currentChapter.number}`;
-  const ogTitle = `${currentChapter.title} – ${story.title}`;
+  const ogTitle = `${label} – ${story.title}`;
 
   return {
     title,
@@ -141,8 +143,8 @@ export default async function ChapterReaderPage({
     <AppShell>
       <PageHeader
         eyebrow={story.title}
-        title={currentChapter.title}
-        copy={`Chapter ${currentChapter.number} · ${currentChapter.reading_minutes} minute read`}
+        title={chapterLabel(currentChapter)}
+        copy={`${currentChapter.reading_minutes} minute read`}
       />
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[1fr_320px] lg:px-8">

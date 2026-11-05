@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Eye, ChevronDown } from "lucide-react";
 import type { Chapter } from "@/lib/types";
+import { titleHasOwnNumber } from "@/lib/chapter-label";
 
 const GROUP_SIZE = 20;
 
@@ -22,11 +23,23 @@ function ChapterRow({ storySlug, chapter }: { storySlug: string; chapter: Chapte
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="font-semibold text-cream">
-            <span className="text-champagne/80">#{chapter.number}</span> {chapter.title}
+            {titleHasOwnNumber(chapter.title) ? (
+              chapter.title
+            ) : (
+              <>
+                <span className="text-champagne/80">#{chapter.number}</span> {chapter.title}
+              </>
+            )}
           </div>
           <div className="mt-1 text-sm text-cream/55">
-            {chapter.reading_minutes} min ·{" "}
-            <span className={statusColor(chapter.status)}>{chapter.status}</span>
+            {chapter.reading_minutes} min
+            {/* Readers only ever see published chapters; the label is for the author's preview. */}
+            {chapter.status !== "published" && (
+              <>
+                {" · "}
+                <span className={statusColor(chapter.status)}>{chapter.status}</span>
+              </>
+            )}
             {chapter.status === "scheduled" && chapter.scheduled_for && (
               <> · drops {new Date(chapter.scheduled_for).toLocaleString()}</>
             )}

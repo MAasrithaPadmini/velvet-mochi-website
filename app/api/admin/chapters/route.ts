@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase/service";
 import { estimateReadingMinutes } from "@/lib/markdown";
 import { notifySubscribersOfChapter } from "@/lib/newsletter";
+import { chapterLabel } from "@/lib/chapter-label";
 
 export const runtime = "nodejs";
 
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       await svc.from("notifications").insert({
         user_id: null,
         title: `New chapter: ${chapter.title}`,
-        body: `Chapter ${chapter.number} of ${story.title} is live.`,
+        body: `${chapterLabel(chapter)} of ${story.title} is live.`,
         link: `/stories/${story.slug}/chapters/${chapter.number}`,
       });
       notifySubscribersOfChapter({

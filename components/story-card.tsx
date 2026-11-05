@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Story } from "@/lib/types";
+import { storyStatusLabel } from "@/lib/chapter-label";
 
 export function BookCover({ story, large = false }: { story: Story; large?: boolean }) {
   const height = large ? "min-h-[340px]" : "min-h-[260px]";
@@ -68,7 +69,7 @@ export function StoryCard({ story }: { story: Story }) {
           <p className="text-xs uppercase tracking-[.2em] text-champagne/70 truncate">{story.universe}</p>
           <h2 className="mt-1 font-display text-2xl sm:text-3xl text-cream">{story.title}</h2>
         </div>
-        <span className="shrink-0 rounded-full bg-cream/8 px-3 py-1 text-xs text-cream/70">{story.status}</span>
+        <span className="shrink-0 rounded-full bg-cream/8 px-3 py-1 text-xs text-cream/70">{storyStatusLabel(story.status)}</span>
       </div>
       <p className="mt-3 line-clamp-3 text-sm leading-6 text-cream/62">{story.synopsis}</p>
       <div className="mt-4 flex items-center justify-between text-sm text-cream/58">

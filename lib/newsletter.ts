@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/service";
 import { SITE_URL } from "@/lib/site";
 import { listUnsubscribeHeaders, unsubscribePageUrl } from "@/lib/unsubscribe-token";
+import { chapterLabel } from "@/lib/chapter-label";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "";
@@ -57,7 +58,7 @@ function chapterEmailHtml(storyTitle: string, chapterTitle: string, chapterNumbe
   const unsubUrl = unsubscribePageUrl(recipientEmail);
   return `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;color:#222">
     <h2>${storyTitle}</h2>
-    <p>Chapter ${chapterNumber}: ${chapterTitle} just went live.</p>
+    <p>${chapterLabel({ number: chapterNumber, title: chapterTitle })} just went live.</p>
     <p><a href="${url}" style="display:inline-block;background:#c9a876;color:#111;padding:12px 20px;border-radius:999px;text-decoration:none;font-weight:600">Read now</a></p>
     <p style="margin-top:24px;font-size:12px;color:#888">
       You're receiving this because you subscribed to Velvet Mochi updates.
@@ -94,7 +95,7 @@ export async function notifySubscribersOfChapter(params: {
   if (emails.length === 0) return { sent: 0, skipped: false };
 
   const url = `${SITE_URL}/stories/${params.storySlug}/chapters/${params.chapterNumber}`;
-  const subject = `New chapter: ${params.storyTitle} — Ch. ${params.chapterNumber}`;
+  const subject = `New chapter: ${params.storyTitle} — ${chapterLabel({ number: params.chapterNumber, title: params.chapterTitle })}`;
 
   let sent = 0;
   const batchSize = 10;

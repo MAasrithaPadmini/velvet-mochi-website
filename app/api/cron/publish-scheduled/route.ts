@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { notifySubscribersOfChapter } from "@/lib/newsletter";
+import { chapterLabel } from "@/lib/chapter-label";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest) {
     return {
       user_id: null,
       title: `New chapter: ${c.title}`,
-      body: story ? `Chapter ${c.number} of ${story.title} is live.` : `Chapter ${c.number} is live.`,
+      body: story ? `${chapterLabel(c)} of ${story.title} is live.` : `${chapterLabel(c)} is live.`,
       link: story ? `/stories/${story.slug}/chapters/${c.number}` : null,
     };
   });

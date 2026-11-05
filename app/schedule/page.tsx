@@ -1,6 +1,7 @@
 import { AppShell, PageHeader } from "@/components/app-shell";
 import Link from "next/link";
 import { listStories, listChapters } from "@/lib/repositories";
+import { storyStatusLabel } from "@/lib/chapter-label";
 
 export const metadata = {
   title: "Release Schedule | Velvet Mochi",
@@ -57,7 +58,7 @@ export default async function SchedulePage() {
                   <div>
                     <div className="font-display text-xl text-cream">{story.title}</div>
                     <div className="mt-1 text-sm text-cream/55">
-                      {chapterCount} chapter{chapterCount === 1 ? "" : "s"} · {story.status}
+                      {chapterCount} chapter{chapterCount === 1 ? "" : "s"} · {storyStatusLabel(story.status)}
                     </div>
                   </div>
                   <div className="text-sm text-champagne">
