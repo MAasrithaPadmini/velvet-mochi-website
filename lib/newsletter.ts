@@ -5,6 +5,9 @@ import { listUnsubscribeHeaders, unsubscribePageUrl } from "@/lib/unsubscribe-to
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM_EMAIL = process.env.NEWSLETTER_FROM_EMAIL ?? "";
 const FROM_NAME = process.env.NEWSLETTER_FROM_NAME ?? "Velvet Mochi";
+// Optional: where reader replies go (e.g. your Gmail), since the From address
+// on your domain may not have an inbox.
+const REPLY_TO = process.env.NEWSLETTER_REPLY_TO ?? "";
 
 /**
  * Sends one email through Resend. Pass `unsubscribeFor` on newsletter mail so the
@@ -34,6 +37,7 @@ export async function sendEmail(
         to,
         subject,
         html,
+        reply_to: REPLY_TO || undefined,
         headers: options.unsubscribeFor ? listUnsubscribeHeaders(options.unsubscribeFor) : undefined,
       }),
     });
