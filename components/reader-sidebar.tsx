@@ -115,7 +115,11 @@ export function ReaderSidebar({
         </div>
         {!loggedIn && (
           <p className="mt-2 text-xs text-cream/50">
-            <Link href={`/login?next=/stories/${story.slug}/chapters/${chapter.number}`} className="text-champagne">
+            <Link
+              href={`/login?next=/stories/${story.slug}/chapters/${chapter.number}`}
+              rel="nofollow"
+              className="text-champagne"
+            >
               Login
             </Link>{" "}
             to save your place.
