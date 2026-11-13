@@ -1,9 +1,10 @@
 import Script from "next/script";
 
-// Google Analytics 4. Loads only when NEXT_PUBLIC_GA_MEASUREMENT_ID (e.g. G-XXXXXXXXXX)
-// is set in Vercel, so nothing is sent until the author turns it on.
+// Google Analytics 4. Loads only when GA_MEASUREMENT_ID (e.g. G-XXXXXXXXXX) is set in
+// Vercel, so nothing is sent until the author turns it on. This is a server component,
+// so a plain (non NEXT_PUBLIC_) variable works; the old name is still accepted.
 export function GoogleAnalytics() {
-  const id = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+  const id = (process.env.GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "").trim();
   if (!id || !/^G-[A-Z0-9]+$/.test(id)) return null;
 
   return (
