@@ -6,6 +6,8 @@ import { ChapterList } from "@/components/chapter-list";
 import { getStory, listChapters } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
 import { excerpt, toPlainText } from "@/lib/plain-text";
+import { storyGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 export const revalidate = 30;
 
@@ -20,14 +22,17 @@ export async function generateMetadata({
     return { title: "Story | Velvet Mochi" };
   }
 
-  const title = `${story.title} | Velvet Mochi`;
+  const title = `${story.title}: Read Free Online | Velvet Mochi`;
   const description = excerpt(story.synopsis, 160) || "A serialized dark romance on Velvet Mochi.";
   const images = story.cover_url ? [{ url: story.cover_url, width: 800, height: 1200, alt: story.title }] : undefined;
 
   return {
     title,
     description,
+    alternates: { canonical: `/stories/${story.slug}` },
     openGraph: {
+      siteName: "Velvet Mochi",
+      url: `/stories/${story.slug}`,
       title: story.title,
       description,
       type: "book",
@@ -56,6 +61,9 @@ export default async function StoryDetailPage({ params }: { params: Promise<{ sl
   return (
     <AppShell>
       <PageHeader eyebrow={story.universe} title={story.title} copy={toPlainText(story.synopsis)} />
+      {story.status === "published" && (
+        <JsonLd data={storyGraph(story, chapters.filter((c) => c.status === "published"))} />
+      )}
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-[.85fr_1.15fr] lg:px-8">
         <div className="space-y-5">

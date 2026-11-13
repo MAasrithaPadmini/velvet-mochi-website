@@ -6,6 +6,7 @@ import { storyStatusLabel } from "@/lib/chapter-label";
 export const metadata = {
   title: "Release Schedule | Velvet Mochi",
   description: "See how often each story on Velvet Mochi updates and when the latest chapter went up.",
+  alternates: { canonical: "/schedule" },
 };
 
 export const revalidate = 60;

@@ -3,8 +3,19 @@ import Image from "next/image";
 import { AppShell, PageHeader } from "@/components/app-shell";
 import { createServiceClient } from "@/lib/supabase/service";
 import { Instagram, Twitter, Globe, Mail, BookOpen } from "lucide-react";
+import type { Metadata } from "next";
+import { getAuthorProfile as getBrandAuthorProfile } from "@/lib/brand";
+import { aboutGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 export const revalidate = 30;
+
+export const metadata: Metadata = {
+  title: "About the Author: Padmini (Padroha) | Velvet Mochi",
+  description:
+    "Meet Padmini, the Indian author who writes as Padroha and created Velvet Mochi, a free library of serialized dark romance.",
+  alternates: { canonical: "/about" },
+};
 
 type AuthorProfile = {
   name: string;
@@ -41,6 +52,7 @@ async function getPublishedStoriesCount(): Promise<number> {
 export default async function AboutPage() {
   const profile = await getAuthorProfile();
   const storiesCount = await getPublishedStoriesCount();
+  const brandProfile = await getBrandAuthorProfile();
 
   const name = profile?.name ?? "Velvet Mochi";
   const tagline = profile?.tagline ?? "Author of moonlit dark romance";
@@ -50,6 +62,7 @@ export default async function AboutPage() {
   return (
     <AppShell>
       <PageHeader eyebrow="About the author" title={name} copy={tagline} />
+      <JsonLd data={aboutGraph(brandProfile)} />
 
       <section className="mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="glass overflow-hidden rounded-[2rem]">

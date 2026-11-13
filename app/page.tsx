@@ -7,8 +7,14 @@ import { listStories } from "@/lib/repositories";
 import { getCurrentProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { toPlainText } from "@/lib/plain-text";
+import { BRAND, getAuthorProfile } from "@/lib/brand";
+import { siteGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 export const revalidate = 60;
+
+// Canonical set here only: in the root layout it would be inherited by every page.
+export const metadata = { alternates: { canonical: "/" } };
 
 async function getContinueReading() {
   const profile = await getCurrentProfile();
@@ -34,7 +40,7 @@ async function getContinueReading() {
 }
 
 export default async function HomePage() {
-  const [stories, continueReading] = await Promise.all([listStories(), getContinueReading()]);
+  const [stories, continueReading, author] = await Promise.all([listStories(), getContinueReading(), getAuthorProfile()]);
   const featured = stories[0];
 
   return (
@@ -105,9 +111,22 @@ export default async function HomePage() {
         </section>
       )}
 
+      <section className="mx-auto max-w-3xl px-4 pb-10 sm:px-6 lg:px-8">
+        {/* Plain-language answer to "what is Velvet Mochi?" for readers, search engines and AI assistants. */}
+        <h2 className="font-display text-3xl text-cream">What is Velvet Mochi?</h2>
+        <p className="mt-3 text-sm leading-7 text-cream/70">{BRAND.longDescription}</p>
+        <p className="mt-2 text-sm leading-7 text-cream/55">
+          Start in the <Link href="/library" className="text-champagne underline">library</Link>, read the{" "}
+          <Link href="/faq" className="text-champagne underline">FAQ</Link>, or meet the{" "}
+          <Link href="/about" className="text-champagne underline">author</Link>.
+        </p>
+      </section>
+
       <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
         <NewsletterForm />
       </section>
+
+      <JsonLd data={siteGraph(author)} />
     </AppShell>
   );
 }

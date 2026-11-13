@@ -5,6 +5,13 @@ import { getCurrentProfile } from "@/lib/auth";
 
 export const revalidate = 30;
 
+export const metadata = {
+  title: "Library: All Stories | Velvet Mochi",
+  description:
+    "Browse every story on Velvet Mochi: free, original serialized dark romance by Padroha, with genres, chapter counts and content warnings.",
+  alternates: { canonical: "/library" },
+};
+
 export default async function LibraryPage() {
   const profile = await getCurrentProfile();
   const isAdmin = profile && (profile.role === "admin" || profile.role === "author");

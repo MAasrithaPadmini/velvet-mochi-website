@@ -13,6 +13,8 @@ import { SITE_URL } from "@/lib/site";
 import { chapterLabel } from "@/lib/chapter-label";
 import { ViewTracker } from "@/components/view-tracker";
 import { excerpt } from "@/lib/plain-text";
+import { chapterGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 export const dynamic = "force-dynamic";
 
@@ -121,6 +123,7 @@ export default async function ChapterReaderPage({
 
   return (
     <AppShell>
+      {currentChapter.status === "published" && <JsonLd data={chapterGraph(story, currentChapter)} />}
       <PageHeader
         eyebrow={story.title}
         title={chapterLabel(currentChapter)}

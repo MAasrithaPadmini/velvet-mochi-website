@@ -1,11 +1,32 @@
 import { AppShell, PageHeader } from "@/components/app-shell";
+import { BRAND } from "@/lib/brand";
+import { faqGraph } from "@/lib/structured-data";
+import { JsonLd } from "@/components/json-ld";
 
 export const metadata = {
   title: "FAQ | Velvet Mochi",
-  description: "Frequently asked questions about reading, accounts, and updates on Velvet Mochi.",
+  description:
+    "What is Velvet Mochi, who writes it, is it free, and how often chapters come out: answers about the Velvet Mochi dark romance library.",
+  alternates: { canonical: "/faq" },
 };
 
 const FAQS: { q: string; a: string }[] = [
+  {
+    q: "What is Velvet Mochi?",
+    a: BRAND.longDescription,
+  },
+  {
+    q: "Who writes the stories on Velvet Mochi?",
+    a: "Every story on Velvet Mochi is written by Padmini, an Indian author who publishes under the pen name Padroha. You can read more about her on the About page.",
+  },
+  {
+    q: "What kind of stories are on Velvet Mochi?",
+    a: "Original serialized dark romance for adults: slow-burn and possessive romances with soft, curvy heroines and morally grey heroes, many set in India. Each story page lists its genre and content warnings.",
+  },
+  {
+    q: "Is Velvet Mochi a mochi or dessert brand?",
+    a: BRAND.disambiguation + " The name is the pen brand of author Padroha, and the site is velvetmochi.com.",
+  },
   {
     q: "Is Velvet Mochi free to read?",
     a: "Yes. All published chapters are free to read. Creating a free account lets you bookmark stories and pick up where you left off.",
@@ -48,6 +69,7 @@ export default function FaqPage() {
   return (
     <AppShell>
       <PageHeader eyebrow="Help" title="Frequently Asked Questions" />
+      <JsonLd data={faqGraph(FAQS)} />
       <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="glass rounded-[1.75rem] p-6 sm:p-10 space-y-6">
           {FAQS.map((item) => (
