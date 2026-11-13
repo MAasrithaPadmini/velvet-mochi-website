@@ -9,7 +9,7 @@ export function Footer() {
           <div className="flex items-center gap-2 text-cream/60">
             <Moon size={16} className="text-champagne" />
             <span className="font-display text-lg text-cream">Velvet Mochi</span>
-            <span className="text-cream/40">by Padroha</span>
+            <span className="text-cream/40">by Padmini</span>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 text-xs text-cream/45">
@@ -40,7 +40,7 @@ export function Footer() {
           </div>
 
           <p className="text-xs text-cream/35">
-            © {new Date().getFullYear()} Padroha. All rights reserved.
+            © {new Date().getFullYear()} Padmini. All rights reserved.
           </p>
         </div>
 

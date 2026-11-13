@@ -18,8 +18,7 @@ export function authorNode(profile: AuthorProfile | null): Json {
   return {
     "@type": "Person",
     "@id": AUTHOR_ID,
-    name: profile?.name || "Padmini",
-    alternateName: BRAND.penName,
+    name: profile?.name || BRAND.authorName,
     url: `${SITE_URL}/about`,
     jobTitle: "Author",
     description: profile?.tagline || "Author of moonlit dark romance",

@@ -30,7 +30,7 @@ export default function TermsPage() {
           </Section>
 
           <Section title="5. Content Ownership">
-            All stories, chapters, characters, and creative content published on Velvet Mochi are the intellectual property of Padroha (the author). You may not reproduce, distribute, or create derivative works from any content on this platform without explicit written permission.
+            All stories, chapters, characters, and creative content published on Velvet Mochi are the intellectual property of Padmini (the author). You may not reproduce, distribute, or create derivative works from any content on this platform without explicit written permission.
           </Section>
 
           <Section title="6. User Conduct">

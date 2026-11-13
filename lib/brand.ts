@@ -9,15 +9,15 @@ import { SITE_URL } from "@/lib/site";
 
 export const BRAND = {
   name: "Velvet Mochi",
-  alternateNames: ["VelvetMochi", "velvetmochi.com", "Velvet Mochi by Padroha"],
-  penName: "Padroha",
+  alternateNames: ["VelvetMochi", "velvetmochi.com", "Velvet Mochi by Padmini"],
+  authorName: "Padmini",
   url: SITE_URL,
   logo: `${SITE_URL}/logo.png`,
   email: "author.velvetmochi@gmail.com",
   shortDescription:
-    "Velvet Mochi is a free online library of original serialized dark romance fiction, written by Indian author Padmini under the pen name Padroha.",
+    "Velvet Mochi is a free online library of original serialized dark romance fiction, written by Indian author Padmini.",
   longDescription:
-    "Velvet Mochi (velvetmochi.com) is a free online library of original serialized dark romance fiction for adult readers (18+), written by Indian author Padmini under the pen name Padroha. New chapters of each story are released one by one. The stories centre on soft, curvy heroines and possessive, morally grey heroes, often in Indian settings. Every story is free to read; a free account adds bookmarks, reading progress and comments.",
+    "Velvet Mochi (velvetmochi.com) is a free online library of original serialized dark romance fiction for adult readers (18+), written by Indian author Padmini. New chapters of each story are released one by one. The stories centre on soft, curvy heroines and possessive, morally grey heroes, often in Indian settings. Every story is free to read; a free account adds bookmarks, reading progress and comments.",
   // Velvet Mochi is not a food brand; saying so helps AI answers disambiguate.
   disambiguation: "Velvet Mochi is a fiction website. It is not a bakery or a mochi dessert brand.",
 } as const;

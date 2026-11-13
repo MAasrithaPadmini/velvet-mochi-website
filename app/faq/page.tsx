@@ -17,7 +17,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who writes the stories on Velvet Mochi?",
-    a: "Every story on Velvet Mochi is written by Padmini, an Indian author who publishes under the pen name Padroha. You can read more about her on the About page.",
+    a: "Every story on Velvet Mochi is written by Padmini, an Indian author. You can read more about her on the About page.",
   },
   {
     q: "What kind of stories are on Velvet Mochi?",
@@ -25,7 +25,7 @@ const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Is Velvet Mochi a mochi or dessert brand?",
-    a: BRAND.disambiguation + " The name is the pen brand of author Padroha, and the site is velvetmochi.com.",
+    a: BRAND.disambiguation + " Velvet Mochi is the brand of author Padmini, and the site is velvetmochi.com.",
   },
   {
     q: "Is Velvet Mochi free to read?",

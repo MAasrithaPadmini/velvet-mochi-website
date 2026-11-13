@@ -20,18 +20,18 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Velvet Mochi | Free Serialized Dark Romance Stories by Padroha",
+  title: "Velvet Mochi | Free Serialized Dark Romance Stories by Padmini",
   description:
-    "Velvet Mochi is a free online library of original serialized dark romance by Indian author Padroha: curvy heroines, possessive heroes, new chapters regularly.",
+    "Velvet Mochi is a free online library of original serialized dark romance by Indian author Padmini: curvy heroines, possessive heroes, new chapters regularly.",
   applicationName: "Velvet Mochi",
-  authors: [{ name: "Padroha", url: `${SITE_URL}/about` }],
-  creator: "Padroha",
+  authors: [{ name: "Padmini", url: `${SITE_URL}/about` }],
+  creator: "Padmini",
   publisher: "Velvet Mochi",
   keywords: [
     "serialized fiction",
     "dark romance",
     "Velvet Mochi",
-    "Padroha",
+    "Padmini",
     "romance novels",
     "chubby heroine romance",
     "Indian dark romance",

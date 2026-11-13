@@ -32,7 +32,7 @@ ${BRAND.disambiguation}
 
 Key facts:
 - Website: ${SITE_URL}
-- Author: Padmini, writing as ${BRAND.penName} (India)
+- Author: ${BRAND.authorName} (India)
 - Format: original serialized fiction, released chapter by chapter
 - Genre: dark romance, slow burn, possessive romance; Indian settings
 - Audience: adults 18+; every story lists content warnings
@@ -46,7 +46,7 @@ ${storyLines}
 ## Pages
 
 - [Library](${SITE_URL}/library): every story with genre, chapter count and status
-- [About the author](${SITE_URL}/about): Padmini (${BRAND.penName})
+- [About the author](${SITE_URL}/about): ${BRAND.authorName}
 - [FAQ](${SITE_URL}/faq): what Velvet Mochi is, pricing, schedule, accounts
 - [Release schedule](${SITE_URL}/schedule): how often each story updates
 - [Content guide](${SITE_URL}/content-guide): what each content warning means

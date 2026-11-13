@@ -11,9 +11,9 @@ import { JsonLd } from "@/components/json-ld";
 export const revalidate = 30;
 
 export const metadata: Metadata = {
-  title: "About the Author: Padmini (Padroha) | Velvet Mochi",
+  title: "About the Author: Padmini | Velvet Mochi",
   description:
-    "Meet Padmini, the Indian author who writes as Padroha and created Velvet Mochi, a free library of serialized dark romance.",
+    "Meet Padmini, the Indian author who created Velvet Mochi, a free library of serialized dark romance.",
   alternates: { canonical: "/about" },
 };
 

@@ -8,7 +8,7 @@ export const revalidate = 30;
 export const metadata = {
   title: "Library: All Stories | Velvet Mochi",
   description:
-    "Browse every story on Velvet Mochi: free, original serialized dark romance by Padroha, with genres, chapter counts and content warnings.",
+    "Browse every story on Velvet Mochi: free, original serialized dark romance by Padmini, with genres, chapter counts and content warnings.",
   alternates: { canonical: "/library" },
 };
 
